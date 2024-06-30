@@ -9,6 +9,8 @@ For my own visualization nd while testing I add the python program cuboid_draw_u
 I delete a code rows from Kyle's program, which are related to calibration, because the  BNO055 (Adafruit) has an own calibration routine.
 ![BNO055-compass-belt](https://github.com/ReinhardLenz/compass-belt/assets/71219487/7bb7d39d-76ff-4b1b-aeab-f480bed74faf)
 
+Demonstration
+https://www.youtube.com/shorts/g_NRIJJ5g9o
 
 
 Materials Used
@@ -46,6 +48,9 @@ Schematic
 
 Zoomed in:
 ![BNO055-compass-belt-more_detailed](https://github.com/ReinhardLenz/compass-belt/assets/71219487/cf66cca9-e621-40bb-ba93-dcc072998f5a)
+
+Schematic:
+![schematic](https://github.com/ReinhardLenz/compass-belt/assets/71219487/e567b028-0a2c-406e-87f9-db1e4d16e38e)
 
 
 Wrap the circuit in electrical tape. For the best results, get electrical tape with equal width as the belt and wrap the whole belt, leaving just a USB cable exposed for the Arduino.
