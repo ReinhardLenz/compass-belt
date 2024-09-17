@@ -28,7 +28,15 @@ if (temp == 0) {
   Serial.print(euler.y());
   Serial.print(" Z: ");
   Serial.print(euler.z());
-  //Serial.println();
+/*
+  Serial.print("X: ");
+  Serial.print(mag.x());
+  Serial.print(" Y: ");
+  Serial.print(mag.y());
+  Serial.print(" Z: ");
+  Serial.println(mag.z());
+  Serial.println("-----");
+*/
 float mag_x = magXFilter_.filter(mag.x());
 float mag_y = magYFilter_.filter(mag.y());
 float mag_z = magZFilter_.filter(mag.z());
@@ -45,12 +53,14 @@ float mag_z = magZFilter_.filter(mag.z());
   Xm=mag_x*cos(thetaRad)-mag_y*sin(phiRad)*sin(thetaRad)+mag_z*cos(phiRad)*sin(thetaRad);
   Ym=mag_y*cos(phiRad)+mag_z*sin(phiRad);
  
-  float heading_deg=atan2(Ym,Xm)/(2*3.14)*360;
+  float heading_deg_B=atan2(Ym,Xm)/(2*3.14)*360;
+  float heading_deg=euler.x();
 
-  // Print the heading in degrees
-/*  Serial.print("0");
-  Serial.print(",");
-  */
+  Serial.print(" A: ");
+  Serial.print(heading_deg);
+ 
+  Serial.print(" B: ");
+  Serial.println(heading_deg_B);
 
   if (heading_deg < 0){
     heading_deg += 360;  
@@ -63,13 +73,6 @@ float mag_z = magZFilter_.filter(mag.z());
     heading_deg -= 360;
   }
 */
-
-  
- // Serial.print(heading_deg);
- // Serial.print(",");
-
-  //Serial.println("200");
-  // Return the heading in degrees
 
   return heading_deg;
   delay(BNO055_SAMPLERATE_DELAY_MS);
