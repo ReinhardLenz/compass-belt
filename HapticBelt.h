@@ -29,3 +29,4 @@ class HapticBelt
         void off();
 };
 #endif
+
