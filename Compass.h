@@ -1,67 +1,38 @@
-
 #ifndef Compass_H
 #define Compass_H
-#define BNO055_SAMPLERATE_DELAY_MS (100)
-#include <Adafruit_BNO055.h>
-#include <Adafruit_Sensor.h>
-#include<utility/imumaths.h>
-#include<math.h>
+#define BNO085_SAMPLERATE_DELAY_MS (100)
+#include <math.h>
 #include <Wire.h>
 #include <Arduino.h>
 #include <KalmanFilter.h>
-extern Adafruit_BNO055 myIMU;
-
+#include <Adafruit_BNO08x.h>
+#define BNO08X_ADDR 0x4B // Make sure this matches your device
+struct euler_t {
+    float yaw;
+    float pitch;
+    float roll;
+};
 class Compass {
   public:
-    Compass(float declination);
-    float getHeading();
-    float heading();
-    float heading_rad();
-
+    // Constructor: Removed sensor initialization
+    Compass() {};
+    // Modified getHeading to accept sensor objects as arguments
+    float getHeading(Adafruit_BNO08x* bno08x, sh2_SensorValue_t* sensorValue); 
+    static long getReportInterval() { return reportIntervalUs; }
   private:
     bool activeCalibration_ = false;
-    long calibrationResetInverval_ = 1000L * 60L * 60L; // 1 Hour
+    long calibrationResetInterval_ = 1000L * 60L * 60L; // 1 Hour
     long lastCalibrationTime_ = 0L;
-
-//magneto calibration related variables
-
-    float defaultXb_ = 0.202718;
-    float defaultYb_ = 1.331912;
-    float defaultZb_ = 1.512557;
-    
-    float default_s11 = 1.031141;
-    float default_s12=  0.005640;
-    float default_s13 = 0.004084;
-
-    float default_s21 = 0.005640;
-    float default_s22=  1.055027;
-    float default_s23 = 0.078600;
-
-    float default_s31 = 0.004084;
-    float default_s32=  0.078600;
-    float default_s33 = 0.952788;
-
-    
-
-// BNO055 related variables
-    float thetaM;
-    float phiM;
-    float theta;
-    float phi;
-    float Xm;
-    float Ym;
-    float psi;
-    float dt;
-    unsigned long millisOld;
-    float thetaRad;
-    float phiRad;
-    float declination_;
-
-    
-    KalmanFilter magXFilter_ {15, 15, 0, 0.05};
-    KalmanFilter magYFilter_ {15, 15, 0, 0.05};
-    KalmanFilter magZFilter_ {15, 15, 0, 0.05};
-
+    float yaw, pitch, roll;
+    float accuracy;
+    euler_t ypr;
+    int acc_status;
+    static const long reportIntervalUs = 100000L; // Define the interval
+    KalmanFilter magXFilter_{15, 15, 0, 0.05};
+    KalmanFilter magYFilter_{15, 15, 0, 0.05};
+    KalmanFilter magZFilter_{15, 15, 0, 0.05};
 };
-
+void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, bool degrees = false);
+void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* ypr, bool degrees = false);
+float getNorthDirection(float yaw);
 #endif
