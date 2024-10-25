@@ -1,96 +1,83 @@
+// ----- HEADER FILES-----
 #include "HapticBelt.h"
 #include "CompassBelt.h"
 #include "Compass.h"
 #include "Button.h"
+#include "potentiometer.h"
+// ----- LIBRARY FILES-----
+#include <Wire.h>
+#include <Adafruit_BNO08x.h>
+
+#define BNO08X_RESET -1 // useful to force BNO reset if problem (accuracy, etc.)
+#define TIMEOUT_BOOT_BNO 100
+#define BNO08X_I2C_ADDRESS 0x4B
 
 // ----- CONFIGURATION -----
-
-// Pins
-
-const int northPin = 3;
-const int northWestPin = 4;
-const int westPin = 5;
-const int southWestPin = 6;
-const int southPin = 9;
-const int southEastPin = 10;
-const int eastPin = 11;
-const int northEastPin = 12;
-const int alwaysOnButtonPin = 13;
-
-/*
-const int northPin = 3;
-const int northWestPin = 12;
-const int westPin = 8;
-const int southWestPin = 7;
-const int southPin = 6;
-const int southEastPin = 5;
-const int eastPin = 4;
-const int northEastPin = 10;
-const int alwaysOnButtonPin = 13;
-*/
+const int alwaysOnButtonPin = A0;
 unsigned long millisOld;
-// Geomagnetic declination (set this based on your location)
-const float declination = 10;
-
-// The default vibration duration in milliseconds
-const unsigned long vibrationDurationMillis = 200UL;
-
-// The default vibration interval in milliseconds
-const unsigned long vibrationInvervalMillis = 60UL * 1000UL;
-
+const unsigned long vibrationDurationMillis = 200UL;  // The default vibration duration in milliseconds
+const unsigned long vibrationIntervalMillis = 1000UL;  // The default vibration interval in milliseconds
 const unsigned long serialKeepDurationMillis = 10UL * 1000UL;
+int belt_pins[18] = {3,2,5,4,6,7,9,8,10,22,11,23,44,24,45,25,46,26};
+int degree_shift; // Declare degree_shift here
 
-// ----- END CONFIGURATION -----
-
-int belt_pins[8] = {northPin, northWestPin, westPin, southWestPin, southPin, southEastPin, eastPin, northEastPin};
-Button button{alwaysOnButtonPin};
 
 long lastSerialRecv = -10000L;
 float lastSerialHeading = 0.0f;
-
+boolean update_sensor_1 = false;
+long reportIntervalUs = 15000; // trial
+//----- OBJECT INSTANTIATION OR CLASS INSTANTIATION OF SOURCE OR IMPLEMENTATION FILES -------
+Button button{alwaysOnButtonPin};
+Compass compass;
 HapticBelt belt{belt_pins};
-CompassBelt compassBelt{&belt, vibrationDurationMillis, vibrationInvervalMillis};
-Compass compass{declination};
+CompassBelt compassBelt{&belt, vibrationDurationMillis, vibrationIntervalMillis};
 
-#define BNO055_SAMPLERATE_DELAY_MS (100)
-
-void setup()
+Adafruit_BNO08x bno08x(BNO08X_RESET);
+sh2_SensorValue_t sensorValue_1;
+sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
+void sensorValueToDegree(int &degree_shift); // Declare the function prototype
+void setReports(sh2_SensorId_t reportType, long report_interval)
 {
-  Serial.begin(9600);
-//  Serial.println("start");
-
-//start insert setup of BNO055 here 
-  myIMU.begin();
-  delay(1000);
-  int8_t temp=myIMU.getTemp();
-  //Serial.println(temp);
-  myIMU.setExtCrystalUse(true);
-  millisOld=millis();
-//end 
+  Serial.println("Setting desired reports");
+  if (! bno08x.enableReport(reportType, report_interval))
+  {
+    Serial.println("Could not enable stabilized remote vector on BNO_1");
+  }
+}
+void setup() 
+{
+    Serial.begin(9600);
+    Serial.println("Setup ...");
+    Wire.begin();
+    while (!bno08x.begin_I2C(BNO08X_I2C_ADDRESS)) 
+      {
+         delay(TIMEOUT_BOOT_BNO);
+      }
+    setReports(reportType, reportIntervalUs);
+    Serial.println("Loop ...");
 }
 
-void loop()
-{ //Serial.println("Running");
+void loop() 
+{
+  sensorValueToDegree(degree_shift);
+  static Compass compass;
   ButtonState buttonState = button.read();
+// as long as I have LED's, it should be constant, not blinking
+  
   if (buttonState.isDouble){
     compassBelt.setAlwaysOn(!compassBelt.isAlwaysOn());
   }
-
-  float heading = compass.getHeading();
-
-  if (Serial.available() > 0) {
+  
+  float heading = compass.getHeading(&bno08x, &sensorValue_1);
+  if (Serial.available() > 0) 
+  {
     String serialHeading = Serial.readString();
-    Serial.println("Serial available");
     lastSerialHeading = serialHeading.toFloat();
     lastSerialRecv = millis();
   }
-
-   if (millis() - lastSerialRecv < serialKeepDurationMillis){
+  if (millis() - lastSerialRecv < serialKeepDurationMillis) 
+  {
     heading = lastSerialHeading;
-   }
-  
-
-  compassBelt.update(heading);  
-  
-  
+  }
+  compassBelt.update(heading);
 }
