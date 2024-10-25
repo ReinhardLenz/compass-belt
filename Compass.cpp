@@ -1,79 +1,97 @@
 #include "Compass.h"
+// Define ypr_1 outside of any function or class
+euler_t ypr_1;
+float AbsDir;
+extern int degree_shift;
+void quaternionToEuler(float qr, 
+                       float qi, 
+                       float qj, 
+                       float qk, 
+                       euler_t* ypr, 
+                       bool degrees) 
+                       {
+                          float sqr = sq(qr);
+                          float sqi = sq(qi);
+                          float sqj = sq(qj);
+                          float sqk = sq(qk);
+                          ypr->yaw = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
+                          ypr->pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
+                          ypr->roll = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
+                          if (degrees) {
+                              ypr->yaw *= RAD_TO_DEG;
+                              ypr->pitch *= RAD_TO_DEG;
+                              ypr->roll *= RAD_TO_DEG;
+                          }
+                      }
+float getNorthDirection(float yaw) 
+    {
+        // Returns degrees East of North.
+        if (yaw <0) { 
+            return (360 + yaw);
+        } else { 
+            return yaw;
+        }
+    }
+float ConvertToShownDirection(float AbsDir, int degree_shift)
+    {
+       return ((int(AbsDir) + degree_shift) % 360);
+    }
 
-Adafruit_BNO055 myIMU = Adafruit_BNO055(); // Definition
-Compass::Compass(float declination){
-  declination_ = declination;
+    
+void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector,
+                         euler_t* ypr, 
+                         bool degrees) 
+           {
+          quaternionToEuler(rotational_vector->real, 
+                            rotational_vector->i, 
+                            rotational_vector->j, 
+                            rotational_vector->k, 
+                            ypr, 
+                            degrees);
+          }
+
+void quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, 
+                          euler_t* ypr, 
+                          bool degrees) {
+        quaternionToEuler(rotational_vector->real, 
+                          rotational_vector->i, 
+                          rotational_vector->j, 
+                          rotational_vector->k, 
+                          ypr, 
+                          degrees);
 }
+float Compass::getHeading(Adafruit_BNO08x* bno08x, 
+                          sh2_SensorValue_t* sensorValue) 
+                          {
+                          extern sh2_SensorId_t reportType;  
+                          extern long reportIntervalUs;      
+                          #if BNO08X_RESET != -1
+                            if (bno08x->wasReset()) {
+                                                     setReports(reportType, reportIntervalUs);
+                                                    }
+                          #endif
+                          if (bno08x->getSensorEvent(&sensorValue_1)) 
+                                  {
+                                  switch (sensorValue_1.sensorId) 
+                                      {
+                                      case SH2_ARVR_STABILIZED_RV:
+                                          quaternionToEulerRV(&sensorValue_1.un.arvrStabilizedRV, &ypr_1, true);
+                                          break;
+                                      case SH2_GYRO_INTEGRATED_RV:
+                                          quaternionToEulerGI(&sensorValue_1.un.gyroIntegratedRV, &ypr_1, true);
+                                          break;
+                                      }
+                                update_sensor_1 = true;
+                                }
+                          if (update_sensor_1 == true) {
 
-float Compass::getHeading(){
-  uint8_t system, gyro, accel, mg=0;
-  myIMU.getCalibration(&system, &gyro, &accel, &mg);
-  int8_t temp=myIMU.getTemp();
-//Serial.print(temp);
-//Serial.print(",");
-if (temp == 0) {
-    // Trouble detected, attempt to reset I2C
-    Wire.end();
-    delay(1000);
-    Wire.begin();
-}
-  imu:: Vector<3> gyr = myIMU.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
-  imu:: Vector<3> acc = myIMU.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-  imu:: Vector<3> mag = myIMU.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
-  imu::Vector<3> euler = myIMU.getVector(Adafruit_BNO055::VECTOR_EULER);
+                              Serial.print("YAW: "); Serial.print(ypr_1.yaw);
+                              Serial.print(" \tPITCH: "); Serial.print(ypr_1.pitch);
+                              Serial.print(" \tROLL: "); Serial.print(ypr_1.roll);
+                              Serial.println("");
 
-  Serial.print("X: ");
-  Serial.print(euler.x());
-  Serial.print(" Y: ");
-  Serial.print(euler.y());
-  Serial.print(" Z: ");
-  Serial.print(euler.z());
-/*
-  Serial.print("X: ");
-  Serial.print(mag.x());
-  Serial.print(" Y: ");
-  Serial.print(mag.y());
-  Serial.print(" Z: ");
-  Serial.println(mag.z());
-  Serial.println("-----");
-*/
-float mag_x = magXFilter_.filter(mag.x());
-float mag_y = magYFilter_.filter(mag.y());
-float mag_z = magZFilter_.filter(mag.z());
-
-  thetaM=-atan2(acc.x()/9.8,acc.z()/9.8)/2/3.141592654*360;
-  phiM=-atan2(acc.y()/9.8,acc.z()/9.8)/2/3.141592654*360;
-  dt=(millis()-millisOld)/1000.;
-  millisOld=millis();
-  theta=(theta+gyr.y()*dt)*.95+thetaM*.05;
-  phi=(phi-gyr.x()*dt)*.95+ phiM*.05;
-
-  phiRad=phi/360*(2*3.14);
-  thetaRad=theta/360*(2*3.14);
-  Xm=mag_x*cos(thetaRad)-mag_y*sin(phiRad)*sin(thetaRad)+mag_z*cos(phiRad)*sin(thetaRad);
-  Ym=mag_y*cos(phiRad)+mag_z*sin(phiRad);
- 
-  float heading_deg_B=atan2(Ym,Xm)/(2*3.14)*360;
-  float heading_deg=euler.x();
-
-  Serial.print(" A: ");
-  Serial.print(heading_deg);
- 
-  Serial.print(" B: ");
-  Serial.println(heading_deg_B);
-
-  if (heading_deg < 0){
-    heading_deg += 360;  
-  }
-
-/*
-  heading_deg += 90;
-
-  if (heading_deg >= 360){
-    heading_deg -= 360;
-  }
-*/
-
-  return heading_deg;
-  delay(BNO055_SAMPLERATE_DELAY_MS);
-}
+                              update_sensor_1 = false;
+                          }
+                          AbsDir=getNorthDirection(ypr_1.yaw);  
+                          return ConvertToShownDirection(AbsDir, degree_shift);  // Return the heading
+                      }
