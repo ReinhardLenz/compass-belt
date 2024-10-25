@@ -15,12 +15,12 @@ class CompassBelt
         
     private:
         HapticBelt* belt_;
-        static const char* Direction_names[8];
+        static const char* Direction_names[18];
         unsigned long onDuration_;
         unsigned long vibrationInterval_;
         long lastOn_;
         int lastDirection_;
-        bool alwaysOn_ = false;
+        bool alwaysOn_ = true;
         bool shouldStopVibrating();
         bool shouldStartVibrating();
 };
