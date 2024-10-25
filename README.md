@@ -5,3 +5,4 @@ A picture of the arrangement.
 
 
 There are 2 pushbutton, one is used for change to blinking and constant light.
+The other pushbutton is not used
