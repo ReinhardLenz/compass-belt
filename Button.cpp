@@ -3,16 +3,19 @@
 Button::Button(int pin)
 {
   this->pin = pin;
-  pinMode(pin, INPUT_PULLUP);  
+  pinMode(pin, INPUT);  
 }
 
 ButtonState Button::read()
 {
-  // TODO: Add debouncer
   bool pressed = digitalRead(pin);
-  //Serial.println("button pressed");
+
+
+  
   bool down = pressed && !wasPressed;
   bool up = !pressed && wasPressed;
+
+  
   long pressDuration = 0;
 
   if (down){
