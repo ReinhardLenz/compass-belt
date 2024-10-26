@@ -42,7 +42,24 @@ bool CompassBelt::isAlwaysOn(){
 }
 void CompassBelt::off()
 {
+  
   belt_->off();
+}
+
+void CompassBelt::lampTest() {
+    int pins[18] = {3, 2, 5, 4, 6, 7, 9, 8, 10, 22, 11, 23, 44, 24, 45, 25, 46, 26};
+    int numberOfPins = 18;
+    // Iterate over each pin
+    for (int i = 0; i < numberOfPins; i++) {
+        // Set all pins to LOW
+        for (int j = 0; j < numberOfPins; j++) {
+            digitalWrite(pins[j], LOW);
+        }
+        // Set the current pin to HIGH
+        digitalWrite(pins[i], HIGH);
+        // Wait for 500 milliseconds
+        delay(500);
+    }
 }
 
 // Direction Change & Initiation: If the heading value results in a new direction
@@ -57,6 +74,9 @@ void CompassBelt::update(double heading)
         // Contract violation
         return;
     }
+
+
+
 
     const int direction_threshold = 5;
     int direction = (int)(round(heading / 20) * 20) % 360;
