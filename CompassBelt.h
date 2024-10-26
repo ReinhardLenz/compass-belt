@@ -10,6 +10,7 @@ class CompassBelt
         CompassBelt(HapticBelt* belt, unsigned long vibrationDuration, unsigned long vibrationInverval);
         void update(double heading);
         void off();
+        void lampTest();
         void setAlwaysOn(bool alwaysOn);
         bool isAlwaysOn();
         
