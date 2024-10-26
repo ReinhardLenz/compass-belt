@@ -77,7 +77,7 @@ Serial.println(buttonState1.isLong);
 
     if (buttonState1.isLong) // if button pressed longer then 1 second
     {
-        compassBelt.lampTest(); // Run lampTest when button2 is pressed
+        compassBelt.lampTest(); // Run lampTest
     }
     
   float heading = compass.getHeading(&bno08x, &sensorValue_1);
