@@ -18,7 +18,8 @@ bool HapticBelt::isDirectionValid(int direction)
     return direction >= 0 && direction < 360 && direction % 20 == 0;
 }
 
-//Method used in CompassBelt like this: belt_->on(direction, 255);
+//  Method used in CompassBelt like this: belt_->on(direction, 255);
+//  CHOSEN DIRECTION "ON"
 void HapticBelt::on(int direction, int power)
 {
     if (!isDirectionValid(direction))
@@ -35,6 +36,8 @@ void HapticBelt::on(int direction, int power)
       analogWrite(haptic_pins_[position], power);
     }
 }
+
+//ALL DIRECTIONS "OFF"
 // used in CompassBelt 3 times like this: 
 //         belt_->off
 // void CompassBelt::off()
@@ -49,6 +52,7 @@ void HapticBelt::off()
       digitalWrite(haptic_pins_[i], LOW);
   }
 }
+// CHOSEN DIRECTION "OFF"
 // Used in CompassBelt like this: belt_->off(direction);
 void HapticBelt::off(int direction)
 {
