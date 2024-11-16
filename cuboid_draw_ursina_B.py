@@ -2,19 +2,30 @@ from ursina import *
 from serial import Serial, SerialException
 # Set up serial connection
 try:
-    serialPort = Serial(port="COM6", baudrate=9600, timeout=0.5)
+    serialPort = Serial(port="COM13", baudrate=9600, timeout=0.5)
 except SerialException:
     print("Could not open serial port. Please check the port name and your permissions.")
     exit()
 # Initialize the Ursina engine
-app = Ursina()
-window.color = color.rgb(0, 0, 255)  # Set background to blue
+app1 = Ursina()
+window.color = color.rgb(0, 99, 177)  # Set background to blue
 # Create a red cuboid
 cuboid = Entity(
     model='cube',
     color=color.red,
-    scale=(4, .5, 2)
+    scale=(1, .5, 4)
 )
+
+LINE_LENGTH = 0.2
+LINE_THICKNESS = 0.02
+# Define the function to create a line entity
+def create_line(length, thickness, color, position):
+    return Entity(
+        model='cube',
+        scale=(length, thickness, thickness) if length > thickness else (thickness, length, thickness),
+        color=color,
+        position=position
+    )
 
 def setup_lighting():
     # Create a directional light
@@ -40,35 +51,32 @@ def add_text_to_scene(text_string, x_position, y_position):
         nw_text.text = text_string
 def update():
     global nw_text
-    """
-    Update the cuboid's orientation based on gyrometer data.
-    """
     if serialPort.inWaiting() > 0:
         data_bytes = serialPort.readline()
         try:
-            # Decode using UTF-8 and replace errors
             data_str = data_bytes.decode('utf-8', errors='replace').strip()
-            # Parse the gyrometer data assuming the format "X: value Y: value Z: value"
+            print(data_str)
             data_parts = data_str.split()
-            x = float(data_parts[1])   # gyro.x()
-            y = float(data_parts[3])   # gyro.y()
-            z = float(data_parts[5])   # gyro.z()
-            a = data_parts[7]   # angle
-            # Update cuboid's rotation (pitch, yaw, and roll)
-            cuboid.rotation_x = -z % 360  # Convert angles to 0-360 range
-            cuboid.rotation_y = x % 360
-            cuboid.rotation_z = y % 360
-            # Update the nw_text entity with new data (or create it if it doesn't exist)
-            add_text_to_scene(a, x_position=-0.45, y_position=0.45)
-        except (ValueError, IndexError) as e:
+            # Check if all parts are present
+            if len(data_parts) >= 3 and data_parts[0] == "YAW:" and data_parts[2] == "PITCH:" and data_parts[4] == "ROLL:":
+                yaw = float(data_parts[1])  # X YAW value
+                pitch = float(data_parts[3])  # Y PITCH value
+                roll = float(data_parts[5])  # Z ROLL value
+
+                # Update cuboid's rotation
+                cuboid.rotation_x = -pitch % 360
+                cuboid.rotation_y = -yaw % 360
+                cuboid.rotation_z = -roll % 360
+                
+            else:
+                print(f"Incomplete or incorrect data received: {data_str}")
+        except ValueError as e:
             print(f"Error parsing data: {e}")
             pass# Set the update function to be called every frame
 
 
 
 def start():
-    #app = Ursina()
-
     # Set up the scene with lighting
     setup_lighting()
     # Create a red cuboid
@@ -81,9 +89,49 @@ def start():
         receive_shadow=True
     )
    
+       # Create a line from (0,0,0) to (LX,0,0)
+    LX = 5  # Half of the ground plane's scale along the X-axis
+    #X axis
+    line = Entity(
+        model='cube',
+        scale=(LX, 0.05, 0.05),  # Thin cube to look like a line
+        color=color.white,
+        position=(LX / 2, 0, 0)  # Centered between the two points
+    )
+    #Y axis
+
+    line = Entity(
+        model='cube',
+        scale=(0.05, LX, 0.05),  # Thin cube to look like a line
+        color=color.white,
+        position=(0, LX / 2, 0)  # Centered between the two points
+    )
+    
+    #Z axis
+
+    line = Entity(
+        model='cube',
+        scale=(0.05, 0.05, LX),  # Thin cube to look like a line
+        color=color.white,
+        position=(0, 0 , LX / 2)  # Centered between the two points
+    )
+    #mark X axis with "roman I"
+    x_line = create_line(LINE_LENGTH, LINE_THICKNESS, color.red, (LX*1.1, 0, 0))
+    # Create two small lines for Y at coordinate (0.0, LY, 0.0)
+    #mark Y axis with "roman II"
+    LY = 1.0  # The position to place the lines
+    y_line_1 = create_line(LINE_LENGTH, LINE_THICKNESS, color.green, (0, LY*1.1, LINE_LENGTH))
+    y_line_2 = create_line(LINE_LENGTH, LINE_THICKNESS, color.green, (0, LY*1.1, -LINE_LENGTH))
+    # Create three small parallel lines for Z at coordinate (0.0, 0.0, LZ)
+    #mark Z axis with "roman III"
+    LZ = 2.0  # The position to place the lines
+    z_line_1 = create_line(LINE_LENGTH, LINE_THICKNESS, color.blue, (0, 0, LZ))
+    z_line_2 = create_line(LINE_LENGTH, LINE_THICKNESS, color.blue, (0, 0.1, LZ))
+    z_line_3 = create_line(LINE_LENGTH, LINE_THICKNESS, color.blue, (0, 0.2, LZ))
+# Setup camera to see the markers
     # Example to add ambient light to the scene
     AmbientLight(color=color.rgba(100, 100, 100, 100))
     EditorCamera()
-    app.run()
+    app1.run()
 if __name__ == '__main__':
     start()
