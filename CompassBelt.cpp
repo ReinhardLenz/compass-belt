@@ -1,78 +1,111 @@
+//      HEADER FILES      
+#include "HapticBelt.h"
 #include "CompassBelt.h"
-const char* CompassBelt::Direction_names[8] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+#include "Compass.h"
+#include "Button.h"
+#include "potentiometer.h"
+// ----- LIBRARY FILES-----
+#include <Wire.h>
+#include <Adafruit_BNO08x.h>
 
-CompassBelt::CompassBelt(HapticBelt* belt, unsigned long vibrationDuration, unsigned long vibrationInverval)
+#define BNO08X_RESET -1 // useful to force BNO reset if problem (accuracy, etc.)
+#define TIMEOUT_BOOT_BNO 100
+#define BNO08X_I2C_ADDRESS 0x4B
+
+// ----- CONFIGURATION -----
+const int alwaysOnButtonPin = A0;
+const int otherPin = A1;
+unsigned long millisOld;
+const unsigned long vibrationDurationMillis = 200UL;  // The default vibration duration in milliseconds
+const unsigned long vibrationIntervalMillis = 1000UL;  // The default vibration interval in milliseconds
+const unsigned long serialKeepDurationMillis = 10UL * 1000UL;
+int belt_pins[20] = {34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53};
+
+int degree_shift; // Declare degree_shift here
+
+
+long lastSerialRecv = -10000L;
+float lastSerialHeading = 0.0f;
+boolean update_sensor_1 = false;
+long reportIntervalUs = 15000; // trial
+//----- OBJECT INSTANTIATION OR CLASS INSTANTIATION OF SOURCE OR IMPLEMENTATION FILES -------
+Button button1{alwaysOnButtonPin};
+Button button2{otherPin};
+Compass compass;
+HapticBelt belt{belt_pins};
+CompassBelt compassBelt{&belt, vibrationDurationMillis, vibrationIntervalMillis};
+
+Adafruit_BNO08x bno08x(BNO08X_RESET);
+sh2_SensorValue_t sensorValue_1;
+sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
+void sensorValueToDegree(int &degree_shift); // Declare the function prototype
+
+
+void setReports(sh2_SensorId_t reportType, long report_interval) {
+  if (! bno08x.enableReport(reportType, report_interval))
+  {
+    Serial.println("Could not enable stabilized remote vector on BNO_1");
+  }
+
+  
+  Serial.println("Setting desired reports");
+  if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
+    Serial.println("Could not enable magnetic field calibrated");
+  }
+  if (!bno08x.enableReport(SH2_RAW_MAGNETOMETER)) {
+    Serial.println("Could not enable raw magnetometer");
+  }
+
+}
+
+void setup() 
 {
-    belt_ = belt;
-    onDuration_ = vibrationDuration;
-    vibrationInterval_ = vibrationInverval;
-    lastOn_ = 0;
-    lastDirection_ = -1;
+    Serial.begin(9600);
+
+   // Serial.println("Setup ...");
+    Wire.begin();
+      // Initialize all the pins as outputs
+  for (int i = 0; i < 20; i++) {
+    pinMode(belt_pins[i], OUTPUT);
+  }
+    while (!bno08x.begin_I2C(BNO08X_I2C_ADDRESS)) 
+      {
+         delay(TIMEOUT_BOOT_BNO);
+      }
+    setReports(reportType, reportIntervalUs);
+    // Serial.println("Loop ...");
 }
 
-void CompassBelt::setAlwaysOn(bool alwaysOn){
-    alwaysOn_ = alwaysOn;
-}
-
-bool CompassBelt::isAlwaysOn(){
-    return alwaysOn_;
-}
-
-void CompassBelt::off()
+void loop() 
 {
-  belt_->off();
-}
+  sensorValueToDegree(degree_shift);
+  static Compass compass;
+  ButtonState buttonState1 = button1.read();
+  ButtonState buttonState2 = button2.read();// not used, but could be used
+// as long as I have LED's, it should be constant, not blinking
+// Serial.print(buttonState1.pressed);
+// Serial.println(buttonState1.isLong);
+// Serial.print("\r"); 
 
-void CompassBelt::update(double heading)
-{
 
-
-    if (heading < 0 || heading >= 360)
+  if (buttonState1.isDouble){
+    compassBelt.setAlwaysOn(!compassBelt.isAlwaysOn());
+  }
+    if (buttonState1.isLong) // if button pressed longer then 1 second
     {
-        // Contract violation
-        Serial.println("XXXX");
-        return;
+        compassBelt.lampTest(); // Run lampTest when button2 is pressed
     }
-
-    const int direction_threshold = 5;
-
-    int direction = (int)(round(heading / 45) * 45) % 360;
-    // Add a buffer zone
-    if (lastDirection_ != -1 && abs(direction - heading) > direction_threshold)
-    {
-        direction = lastDirection_;
-    }
-
-    if (direction != lastDirection_)
-    {
-        if (lastDirection_ != -1){
-            belt_->off(lastDirection_);
-        }
-        lastDirection_ = direction;
-        belt_->on(direction, 255);
-        lastOn_ = millis();
-    }
-
-    if(shouldStartVibrating()) {
-        belt_->on(direction, 255);
-        lastOn_ = millis();
-    } else if (shouldStopVibrating())
-    {
-        belt_->off(direction);
-    } 
-    //Serial.print(direction);
-    Serial.print(" A: ");
-    Serial.println(Direction_names[direction/45]);
-
-    //Serial.println(HapticBelt(Direction_names[direction]));
-
-}
-
-bool CompassBelt::shouldStopVibrating(){
-    return !alwaysOn_ && millis() - lastOn_ >= onDuration_;
-}
-
-bool CompassBelt::shouldStartVibrating(){
-    long timeSinceOn = millis() - lastOn_;
-    return alwaysOn_ || timeSinceOn >= onDuration_ + vibrationInterval_;
+    
+  float heading = compass.getHeading(&bno08x, &sensorValue_1);
+  if (Serial.available() > 0) 
+  {
+    String serialHeading = Serial.readString();
+    lastSerialHeading = serialHeading.toFloat();
+    lastSerialRecv = millis();
+  }
+  if (millis() - lastSerialRecv < serialKeepDurationMillis) 
+  {
+    heading = lastSerialHeading;
+  }
+  compassBelt.update(heading);
 }
