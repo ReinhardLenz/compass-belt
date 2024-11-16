@@ -1,111 +1,137 @@
-//      HEADER FILES      
-#include "HapticBelt.h"
 #include "CompassBelt.h"
-#include "Compass.h"
-#include "Button.h"
-#include "potentiometer.h"
-// ----- LIBRARY FILES-----
-#include <Wire.h>
-#include <Adafruit_BNO08x.h>
+//see HapticBelt.h for direction diagram
+//const char* CompassBelt::Direction_names[20] = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
 
-#define BNO08X_RESET -1 // useful to force BNO reset if problem (accuracy, etc.)
-#define TIMEOUT_BOOT_BNO 100
-#define BNO08X_I2C_ADDRESS 0x4B
+// Intermittent Vibration:
+// Managed through calculated intervals.
+// shouldStartVibrating() checks if sufficient off-time has passed or if always-on is enabled.
+// shouldStopVibrating() stops the vibration after the onDuration_ unless always-on is enabled.
+// Continuous Vibration:
+// Enabled upon detecting a double press which toggles alwaysOn_ to true.
+// When alwaysOn_ is true:
+//   - shouldStartVibrating always returns true.
+//  - shouldStopVibrating always returns false.
+// Ensures the belt remains in a state of continuous vibration until toggled off by
+// another double press. This design integrates with the Button class's double press 
+// detection to either initiate or discontinue continuous vibration mode, making it a 
+// versatile setup for providing directional feedback through haptic responses.
 
-// ----- CONFIGURATION -----
-const int alwaysOnButtonPin = A0;
-const int otherPin = A1;
-unsigned long millisOld;
-const unsigned long vibrationDurationMillis = 200UL;  // The default vibration duration in milliseconds
-const unsigned long vibrationIntervalMillis = 1000UL;  // The default vibration interval in milliseconds
-const unsigned long serialKeepDurationMillis = 10UL * 1000UL;
-int belt_pins[20] = {34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53};
-
-int degree_shift; // Declare degree_shift here
-
-
-long lastSerialRecv = -10000L;
-float lastSerialHeading = 0.0f;
-boolean update_sensor_1 = false;
-long reportIntervalUs = 15000; // trial
-//----- OBJECT INSTANTIATION OR CLASS INSTANTIATION OF SOURCE OR IMPLEMENTATION FILES -------
-Button button1{alwaysOnButtonPin};
-Button button2{otherPin};
-Compass compass;
-HapticBelt belt{belt_pins};
-CompassBelt compassBelt{&belt, vibrationDurationMillis, vibrationIntervalMillis};
-
-Adafruit_BNO08x bno08x(BNO08X_RESET);
-sh2_SensorValue_t sensorValue_1;
-sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
-void sensorValueToDegree(int &degree_shift); // Declare the function prototype
-
-
-void setReports(sh2_SensorId_t reportType, long report_interval) {
-  if (! bno08x.enableReport(reportType, report_interval))
-  {
-    Serial.println("Could not enable stabilized remote vector on BNO_1");
-  }
-
-  
-  Serial.println("Setting desired reports");
-  if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
-    Serial.println("Could not enable magnetic field calibrated");
-  }
-  if (!bno08x.enableReport(SH2_RAW_MAGNETOMETER)) {
-    Serial.println("Could not enable raw magnetometer");
-  }
-
+CompassBelt::CompassBelt(HapticBelt* belt, unsigned long vibrationDuration, unsigned long vibrationInverval)
+{
+    belt_ = belt;
+    onDuration_ = vibrationDuration;
+    vibrationInterval_ = vibrationInverval;
+    lastOn_ = 0;
+    lastDirection_ = -1;
 }
 
-void setup() 
-{
-    Serial.begin(9600);
+// When alwaysOn_ is true, shouldStartVibrating will always return true, 
+// meaning the belt will continuously start vibrating in the update method as 
+// the setReports loop iterates.
+// Concurrently, shouldStopVibrating will always return false, ensuring the 
+// belt remains in a vibrating state during consistent head readings.
 
-   // Serial.println("Setup ...");
-    Wire.begin();
-      // Initialize all the pins as outputs
-  for (int i = 0; i < 20; i++) {
-    pinMode(belt_pins[i], OUTPUT);
-  }
-    while (!bno08x.begin_I2C(BNO08X_I2C_ADDRESS)) 
-      {
-         delay(TIMEOUT_BOOT_BNO);
-      }
-    setReports(reportType, reportIntervalUs);
-    // Serial.println("Loop ...");
+void CompassBelt::setAlwaysOn(bool alwaysOn){
+    alwaysOn_ = alwaysOn;
 }
 
-void loop() 
+// setAlwaysOn sets the alwaysOn_ flag based on the double press (in main.ino program)
+// isAlwaysOn simply returns the current state of alwaysOn_. (like a question
+bool CompassBelt::isAlwaysOn(){
+    return alwaysOn_;
+}
+void CompassBelt::off()
 {
-  sensorValueToDegree(degree_shift);
-  static Compass compass;
-  ButtonState buttonState1 = button1.read();
-  ButtonState buttonState2 = button2.read();// not used, but could be used
-// as long as I have LED's, it should be constant, not blinking
-// Serial.print(buttonState1.pressed);
-// Serial.println(buttonState1.isLong);
-// Serial.print("\r"); 
+  belt_->off();
+}
 
+void CompassBelt::lampTest() {
 
-  if (buttonState1.isDouble){
-    compassBelt.setAlwaysOn(!compassBelt.isAlwaysOn());
-  }
-    if (buttonState1.isLong) // if button pressed longer then 1 second
-    {
-        compassBelt.lampTest(); // Run lampTest when button2 is pressed
+   int numberOfPins = 20;
+    // Iterate over each pin
+    for (int i = 0; i < numberOfPins; i++) {
+        // Set all pins to LOW
+        for (int j = 0; j < numberOfPins; j++) {
+            digitalWrite(belt_pins[j], LOW);
+        }
+        // Set the current pin to HIGH
+        digitalWrite(belt_pins[i], HIGH);
+        // Wait for 500 milliseconds
+        delay(200);
     }
+    digitalWrite(belt_pins[numberOfPins - 1], LOW);
+}
+
+
+// Direction Change & Initiation: If the heading value results in a new direction
+//  (calculated and snapped to nearest 18 degrees), the compass belt will update
+//  the new direction and turn on the belt. This resets lastOn_ to the current time
+//  returned by millis().
+
+void CompassBelt::update(double heading)
+{
+    if (heading < 0 || heading >= 360)
+    {
+        // Contract violation
+        return;
+    }
+
+
+
+
+    const int direction_threshold = 3;
+    int direction = (int)(round(heading / 18) * 18) % 360;
+// Checks if the new direction deviates substantially from the last recorded direction
+    if (lastDirection_ != -1 && abs(direction - heading) > direction_threshold)
     
-  float heading = compass.getHeading(&bno08x, &sensorValue_1);
-  if (Serial.available() > 0) 
-  {
-    String serialHeading = Serial.readString();
-    lastSerialHeading = serialHeading.toFloat();
-    lastSerialRecv = millis();
-  }
-  if (millis() - lastSerialRecv < serialKeepDurationMillis) 
-  {
-    heading = lastSerialHeading;
-  }
-  compassBelt.update(heading);
+// The choice of -1 for sentinel variable lastDirection_ is often due to several reasons:
+// Sentinel Value: -1 is used as a sentinel value to represent an invalid or uninitialized
+//  state since direction values are usually non-negative. It helps distinguish between a real
+//  direction (e.g., 0, 1, 2, ...) and a state where no direction has been set.
+// 
+// Ease of Checking: Checking if a variable is equal to -1 is straightforward and unambiguous,
+//  which makes the code easier to read and maintain.
+// 
+// Common Convention: Using -1 or other negative values as sentinel values is a common
+//  programming practice, making the code more understandable to other developers who encounter it. 
+    
+      {
+          direction = lastDirection_;
+      }
+// Changes direction if new direction deviates 
+    if (direction != lastDirection_)
+      {
+          if (lastDirection_ != -1){
+              belt_->off(lastDirection_);  // Calls HapticBelt::off(int direction)
+          }
+          lastDirection_ = direction;
+          belt_->on(direction, 255); // Calls HapticBelt::on(int direction, int power)
+          lastOn_ = millis();  // Setting lastOn_ to the current time
+      }
+ // Decides whether to start or stop vibrating based on timing intervals
+    if(shouldStartVibrating()) {
+          belt_->on(direction, 255);  // Calls HapticBelt::on(int direction, int power)
+          lastOn_ = millis();  // Setting lastOn_ to the current time
+      } else if (shouldStopVibrating())
+      {
+          belt_->off(direction); // Calls HapticBelt::off(int direction)
+      } 
+}
+
+// Vibration should stop if the alwaysOn_ flag is false 
+//  and enough time has passed since lastOn_ to exceed the onDuration_.
+bool CompassBelt::shouldStopVibrating(){
+// Stops if it's not always on and the on-time has expired
+    return !alwaysOn_ && millis() - lastOn_ >= onDuration_;
+}
+
+//Should Start Vibrating
+// This method calculates the elapsed time since the last vibration (timeSinceOn).
+//Vibration should start if the alwaysOn_ flag is true, or if enough interval time 
+//(onDuration_ + vibrationInterval_) has passed since lastOn_.
+
+bool CompassBelt::shouldStartVibrating(){
+    long timeSinceOn = millis() - lastOn_;
+// Determining if it is time to start vibrating again
+    return alwaysOn_ || timeSinceOn >= onDuration_ + vibrationInterval_;
 }
