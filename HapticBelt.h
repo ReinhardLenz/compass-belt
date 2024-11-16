@@ -2,28 +2,63 @@
 #define Haptic_Belt_H
 
 #include <Arduino.h>
+ //A haptic belt with the following directions:
+//DIRECTION    PIN
+//   1          34   
+//   2          35
+//   3          36  
+//   4          37
+//   5          38  
+//   6          39
+//   7          40  
+//   8          41
+//   9          42   
+//   10         43
+//   11         44   
+//   12         45
+//   13         46   
+//   14         47
+//   15         48   
+//   16         49
+//   17         50   
+//   18         51
+//   19         52
+//   20         53
+ 
+//                           1                           
+//                   20               2                  
+//           19                              3           
+//                                                      
+//                                                      
+//     18                                           4    
+//                                                      
+//                                                      
+//                                                      
+//  17                                                  5 
+//                                                      
+//                                                      
+//16                                                     6
+//                                                      
+//                                                      
+//  15                                                 7 
+//                                                      
+//                                                      
+//                                                      
+//      14                                          8    
+//                                                      
+//                                                      
+//           13                                 9        
+//                  12                 10                 
+//                           11                          
 
-/*
-    A haptic belt with the following directions:
-
-                0
-            45     315
-         90           270
-           135     225
-               180 
-
-    The pins in the constructor match up to the diagram above clockwise starting at 0.
-
-    Note: Because the belt displays where North is, vibrating 270 (middle right) will correspond to West, not East.
-*/
 
 class HapticBelt
 {
     private:
-        int haptic_pins_[8];
+        int haptic_pins_[20];
         bool isDirectionValid(int direction);
     public:
-        HapticBelt(int haptics[8]);
+        HapticBelt(int haptics[20]);
         void on(int direction, int power);
         void off(int direction);
         void off();
