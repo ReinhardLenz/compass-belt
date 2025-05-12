@@ -1,33 +1,21 @@
-#ifndef Button_H
-#define Button_H
+#ifndef BUTTON_H
+#define BUTTON_H
 
-struct ButtonState {
-  bool pressed;
-  bool down;
-  bool up;
-  bool isLong;
-  bool isShort;
-  bool isDouble;
-  long pressDuration;
-  long lastDownTime;
-  long lastUpTime;
-};
-
-#include <Arduino.h>
+#include "OneButton.h"
+#include "CompassBelt.h"
 
 class Button {
-  public:
-    Button(int pin);
-    ButtonState read();
-
-  private:
-    int pin;
-    bool wasPressed;
-    bool wasLong;
-    long lastDown;
-    long lastUp;
-    long lastSinglePress;
-    long lastDoublePress;
+public:
+    Button(int pin, CompassBelt* compassBelt);
+    void setup();
+    void tick();
+private:
+    OneButton button;
+    CompassBelt* compassBelt;
+    static Button* instance;
+    static void doubleclick();
+    static void singleclick();
+    static void longclick();
 };
 
-#endif
+#endif // BUTTON_H
