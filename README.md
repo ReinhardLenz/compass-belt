@@ -175,9 +175,6 @@ Dupont-male connectors 2.1 Eur
 https://www.aliexpress.com/item/1005006263579523.html?spm=a2g0o.order_list.order_list_main.76.71c71802Jzz7iV
 
 
-![circuit_image](https://github.com/user-attachments/assets/e8656da7-893d-4b32-b777-7794529b107d)
-
-
 With the potentiometer, the direction can be adjusted 360 degrees
 
 the push button: at start, the light is continuous, with "double press", the LED will be blinking
