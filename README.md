@@ -1,183 +1,173 @@
-I have followed https://www.instructables.com/Haptic-Compass-Belt/ by Kyle  Corry. I would not have been able to write such a program, thumbs up to Kyle Corry! (github https://github.com/kylecorry31/compass-belt/tree/master) My adpation here is still unfinished. Because MPU9250 seems to be not anymore produced, I use BNO055 (after going through QM5883L and MAG3110). I also use logic level shifter, although most tutorials don't use them. There is a tilt compensation algorithm in compass.cpp
-
-  Xm=mag_x*cos(thetaRad)-mag_y*sin(phiRad)*sin(thetaRad)+mag_z*cos(phiRad)*sin(thetaRad);
-  Ym=mag_y*cos(phiRad)+mag_z*sin(phiRad);
-following the tutorial by Paul McWorther https://www.youtube.com/watch?v=2AO_Gmh5K3Q&list=PLGs0VKk2DiYwEo-k0mjIkWXlkrJWAU4L9 
-but it doesn't seem to work.
-
-For my own visualization nd while testing I add the python program cuboid_draw_ursina_B.py, which reads out the COM6 port and draws a 3D cube like a symbolized arduino on the screen and writes the present orientation of the sensor on the same screen.  "N", "NE", "E", "SE", "S", "SW", "W", "NW" So I checked with a compass at the same time, and oit seems to work fine. 
-I delete a code rows from Kyle's program, which are related to calibration, because the  BNO055 (Adafruit) has an own calibration routine.
-![BNO055-compass-belt](https://github.com/ReinhardLenz/compass-belt/assets/71219487/7bb7d39d-76ff-4b1b-aeab-f480bed74faf)
-
-Demonstration
-https://www.youtube.com/shorts/g_NRIJJ5g9o
+Compass belt
+ 
 
 
-Materials Used
-Arduino Nano or Uno
-BNO055 (magnetometer) from  www.sertronics.shop
-8 coin vibration motors https://www.aliexpress.com/item/4000245243914.html?spm=a2g0o.order_list.order_list_main.34.46741802QLKmQ5
+Many migratory animals, such as birds and fish, are said to know the compass directions when migrating, sometimes over very long distances, night or day, and often in very bad weather.
+For humans, this kind of knowledge may be needed, for example, when picking berries in an unfamiliar place or simply when losing one's sense of direction.
+A compass belt is a belt that helps you know where north is without looking at a compass. It has small vibration motors and a sensor that detects the Earth's magnetic field. When you wear it, the motor facing north vibrates slightly, giving the wearer an "intuitive" sense of direction.
+Why is this cool? Imagine you are in the forest picking mushrooms at dusk and you lose your bearings. With this belt, you will always feel the "tingle" of the North Pole, which helps you stay on track without maps or compasses.
+/home/users/raikkulenz/sites/raikkulenz.kapsi.fi/www/bodycompass_kuvat/vyo-lantiolla.jpg
 
-Button switch  https://www.aliexpress.com/item/1005006480743277.html?spm=a2g0o.productlist.main.9.37bcz2uRz2uRRn&algo_pvid=ac374021-a592-46b1-b674-9b75ba425bc3&algo_exp_id=ac374021-a592-46b1-b674-9b75ba425bc3-4&pdp_npi=4%40dis%21EUR%2110.88%213.16%21%21%2182.84%2124.02%21%402101c5c317197559689138149e201d%2112000037356247146%21sea%21FI%21718180838%21&curPageLogUid=f7wpyiqAKEKN&utparam-url=scene%3Asearch%7Cquery_from%3A
-
-10K resistor
-
-USB cable
-Belt 
-Battery pack https://www.aliexpress.com/item/1005006403572331.html?spm=a2g0o.order_list.order_list_main.29.46741802QLKmQ5
-
-Breadboard
-
-Logic level converter https://www.aliexpress.com/item/1005006371140878.html?spm=a2g0o.order_list.order_list_main.57.46741802QLKmQ5
-glue
-Soldering kit
-
-Libraries Required
-Adafruit_BNO055
-utility/imumaths.h
-Adafruit_Sensor.h
-Kalman Filter
-
-Instructions (copied from Kyle Corry)
-While wearing the belt, make a mark on it every 45 degrees starting with directly in front of you. This is where the motors will be placed. The Arduino, magnetometer, and button will be placed between the motor directly behind you (S) and the one to the right or left of it (SE or SW). I will refer to all motors by their cardinal direction, assuming the North is the front of the belt.
-Secure the vibration motors onto the belt where marked. The vibration motors I used had sticky backings which made this easy.
-Join the Arduino, magnetometer, and button using hot glue to make them easy to secure onto the belt.
-Secure the Arduino to the belt. I used a zip tie at this stage, because I replaced it in step 6.
-Assemble the circuit shown in the following schematic. Note: The schematic shows the vibration motors sharing a common ground wire - this makes attaching to the Arduino easier but is not required. You will probably need to attach extra lengths of wire to the motors and should insert a USB cable into the Arduino. 
-Schematic
-
-Zoomed in:
-![BNO055-compass-belt-more_detailed](https://github.com/ReinhardLenz/compass-belt/assets/71219487/cf66cca9-e621-40bb-ba93-dcc072998f5a)
-
-Schematic:
-
-Wrap the circuit in electrical tape. For the best results, get electrical tape with equal width as the belt and wrap the whole belt, leaving just a USB cable exposed for the Arduino.
-Upload this sketch to the Arduino after installing the required libraries.
-Attach the battery pack to the Arduino's USB and store in a pocket or secure it to the belt.
-Press the button to toggle between discrete mode (small pulse toward North only when direction changes) or always on mode (always vibrate toward North).
-Isometric view
-![isometric-compass_belt](https://github.com/user-attachments/assets/ad2f93b8-1526-4844-a6f0-61a268109e42)
-
-Circuit designer, schematic:
+This is how I built mine:
+I ordered the electronic parts online for about $60.
+Then I sewed and soldered the vibration motors onto a stretchy fabric belt.
+I added a plastic buckle and used a textile tube to protect it.
 
 
-![updated_circuit](https://github.com/user-attachments/assets/d37295e8-dd3d-4f80-a315-907e4aeac1b7)
+As an orienteering enthusiast with a basic knowledge of electronics, I found this project both fun and useful. Whether you're exploring new trails or just love cool gadgets, the Compass Belt can be a great companion!
 
 
-Documentation generated by CirkitDesigner
+Direction adjustment
+Adjustment knob to adjust the direction 0... 360 degrees
+
+
+vibration modes
+Double-click to switch between continuous and intermittent vibration. Single-click to switch between 1, 2, 3, or 4 seconds. Long press to quickly test that all vibrators are working.
+
+
+Smart sensor
+A self-calibrating magnetometer that recognizes whether you are walking, cycling, or standing still.
+
+
+Battery-powered for hours of navigation.
+Two batteries provide approximately 3 hours of use.
+
+
 Circuit Documentation
+
+
 Summary
-This circuit is designed to interface an Arduino Mega 2560 or Arduino Due with various components, including a Bi-Directional Logic Level Converter, a Trimmer Potentiometer, multiple Vibration Motors, an Adafruit BNO085 9-DOF Orientation IMU Fusion, and other components. The circuit is powered by 18650 batteries and includes a toggle switch for power control. The Arduino Mega 2560 or Arduino Due is programmed to control the vibration motors based on input from the IMU and other sensors, providing haptic feedback.
+
+
+This circuit is designed to interface an Arduino Mega 2560 or Arduino Due with various components, including a Bi-Directional Logic Level Converter, a Trimmer Potentiometer, multiple Vibration Motors, an Adafruit BNO085 9-DOF Orientation IMU Fusion, and other components. The circuit is powered by 18650 batteries and includes a toggle switch for power control. The Arduino Mega 2560 or Arduino Due is programmed to control the vibration motors based on input from the IMU and other sensors, providing haptic feedback about north direction.
+
+
 Component List
+
+
 Arduino Mega 2560 or Arduino Due
 A microcontroller board based on the Atmel SAM3X8E ARM Cortex-M3 CPU.
 Features multiple I/O pins, PWM outputs, and communication interfaces.
+
+
 Bi-Directional Logic Level Converter
 Used to safely interface between different voltage levels, such as 3.3V and 5V.
+
+
 Trimmer Potentiometer
 A variable resistor with a resistance of 10k Ohms, used for adjusting voltage levels.
+
+
 Resistors
-Two resistors with a resistance of 4.7k Ohms and one with 10k Ohms, used for current limiting and voltage division.
+Two resistors with a resistance of 4.7k Ohms and one with 10k Ohms, used for current limiting and as pull-up resistors for the I2C bus.
+
+
 Vibration Motors
 Multiple small motors used to provide haptic feedback.
+
+
 Adafruit BNO085 9-DOF Orientation IMU Fusion
 A sensor module that provides orientation data using a combination of accelerometer, gyroscope, and magnetometer.
-18650 Battery in Holder
+
+
+2 x 18650 Battery in Holder
 Provides power to the circuit.
-Toggle Switch
+
+
+Toggle On off Switch
 Used to control the power supply to the circuit.
+
+
 Push Button
-Used for user input to control the circuit's behavior.
+Used for user input to control the circuit's behaviour.
+
+
 MT3608
 A DC-DC step-up converter used to boost the voltage from the battery.
+
+shopping cart style collection of parts which have to be bought
+
+
 Wiring Details
+
+
 Arduino Mega 2560 or Arduino Due
 A2: Connected to the wiper of the Trimmer Potentiometer.
 A1: Connected to pin1 of the Resistor (10k Ohms) and pin2 of the Push Button.
 D20/SDA3: Connected to HV4 of the Bi-Directional Logic Level Converter.
 D21/SCL3: Connected to HV3 of the Bi-Directional Logic Level Converter.
 5V: Connected to HV of the Bi-Directional Logic Level Converter.
-GND: Connected to GND of the Bi-Directional Logic Level Converter, Resistor (10k Ohms), Trimmer Potentiometer, Adafruit BNO085, and Vibration Motors.
+GND: Connected to GND of the Bi-Directional Logic Level Converter, Resistor (10k Ohms), Trimmer Potentiometer, Adafruit BNO085, Boost module MT3608 and Vibration Motors.
 VIN: Connected to L1 of the Toggle Switch.
 D34 to D53: Connected to the positive terminals of various Vibration Motors.
+
+
 Bi-Directional Logic Level Converter
 GND: Connected to GND of the Arduino Mega 2560 or Arduino Due and other components.
 HV: Connected to 5V of the Arduino Mega 2560 or Arduino Due.
 HV3: Connected to pin1 of the Resistor (4.7k Ohms) and D21/SCL3 of the Arduino Mega 2560 or Arduino Due.
 HV4: Connected to pin1 of the Resistor (4.7k Ohms) and D20/SDA3 of the Arduino Mega 2560 or Arduino Due.
 LV: Connected to pin2 of the Resistor (4.7k Ohms) and leg2 of the Trimmer Potentiometer.
-LV3: Connected to SCL/SCK/RX of the Adafruit BNO085.
-LV4: Connected to SDA/MISO/TX of the Adafruit BNO085.
+LV3: Connected to SCL of the Adafruit BNO085.
+LV4: Connected to SDA of the Adafruit BNO085.
+
+
 Trimmer Potentiometer
 Wiper: Connected to A2 of the Arduino Mega 2560 or Arduino Due.
 Leg1: Connected to GND of the Bi-Directional Logic Level Converter.
 Leg2: Connected to LV of the Bi-Directional Logic Level Converter.
+
+
 Resistors
 10k Ohms: Pin1 connected to A1 of the Arduino Mega 2560 or Arduino Due, pin2 connected to GND.
 4.7k Ohms: Pin1 connected to HV3 and HV4 of the Bi-Directional Logic Level Converter, pin2 connected to LV of the Bi-Directional Logic Level Converter.
+
+
 Vibration Motors
 Positive Terminals: Connected to D34 to D53 of the Arduino Mega 2560 or Arduino Due.
 Negative Terminals: Connected to GND of the Arduino Mega 2560 or Arduino Due.
+
+
 Adafruit BNO085 9-DOF Orientation IMU Fusion
 3.3V: Connected to LV of the Bi-Directional Logic Level Converter.
 GND: Connected to GND of the Arduino Mega 2560 or Arduino Due.
-SCL/SCK/RX: Connected to LV3 of the Bi-Directional Logic Level Converter.
-SDA/MISO/TX: Connected to LV4 of the Bi-Directional Logic Level Converter.
-18650 Battery in Holder
-GND: Connected to VIN- of the MT3608.
-VCC: Connected to VIN+ of the MT3608.
+SCL: Connected to LV3 of the Bi-Directional Logic Level Converter.
+SDA: Connected to LV4 of the Bi-Directional Logic Level Converter.
+
+
+2 pcs 18650 Battery in Holder
+connected in series, + pole of first is connected to + pole of the second
+- pole of First 18650: Connected to VIN- of the MT3608.
++ pole of second: Connected to VIN+ of the MT3608.
+
+
 Toggle Switch
 L1: Connected to VIN of the Arduino Mega 2560 or Arduino Due.
 COM: Connected to VOUT+ of the MT3608.
+
+
 MT3608
-VIN-: Connected to GND of the 18650 Battery.
-VIN+: Connected to VCC of the 18650 Battery.
+VIN-: Connected to - pole of the first 18650 Battery.
+VIN+: Connected to + pole of the second 18650 Battery.
 VOUT-: Connected to GND of the Arduino Mega 2560 or Arduino Due.
 VOUT+: Connected to COM of the Toggle Switch.
+
+
 Push Button
-Pin1: Connected to LV of the Bi-Directional Logic Level Converter.
-Pin2: Connected to A1 of the Arduino Mega 2560 or Arduino Due.
+Pin1: Connected to LV of the Bi-Directional Logic Level Converter .
+Pin2: Connected to A1 of the Arduino Mega 2560 or Arduino Due and connected to pin1 of 10 k Ohms resistor.
+
+
 Code Documentation
 The Arduino Mega 2560 or Arduino Due is programmed using a sketch that includes several libraries for handling the haptic belt, compass, and button inputs. The code initializes the IMU sensor and sets up the vibration motors for haptic feedback. The main loop reads the button states and updates the compass heading based on sensor data or serial input. The haptic belt is updated to provide feedback based on the compass heading.
+Github Compass belt
+
+
 Key Code Features
-Libraries: Includes custom libraries for handling the haptic belt and compass, as well as standard libraries for I2C communication and the BNO08x sensor.
+Libraries: Includes custom libraries for handling the haptic belt and compass, as well as standard libraries OneButton.h for the button clicks, Wire.h for I2C communication and Adafruit_BNO08x.h for the BNO08x sensor.
 Pin Configuration: Defines pins for buttons and vibration motors.
 Sensor Initialization: Initializes the BNO08x sensor and sets up the desired reports.
 Main Loop: Continuously reads button states, updates the compass heading, and controls the haptic belt based on the heading.
-This documentation provides a comprehensive overview of the circuit, including component details, wiring connections, and code functionality.
-
-
-
-Variation with 20 pins, otherwise as the other branches
-![arduino-LED-kehä](https://github.com/user-attachments/assets/fc304d0d-8c2b-44e4-81e2-ed0b36371ae2)
-
-Material:
-Breadboard 
-https://www.aliexpress.com/item/1005004532352681.html?spm=a2g0o.order_list.order_list_main.195.71c71802Jzz7iV
-potentiometer
-https://www.aliexpress.com/item/1005006046392789.html?spm=a2g0o.productlist.main.11.2bf26026kbFIRu&algo_pvid=ce6acf1c-474c-45d5-9a5a-d0eb2b73b96d&algo_exp_id=ce6acf1c-474c-45d5-9a5a-d0eb2b73b96d-5&pdp_npi=4%40dis%21EUR%211.96%211.88%21%21%212.02%211.94%21%40211b813f17317522374698149e2064%2112000035477467226%21sea%21FI%21718180838%21X&curPageLogUid=IXdMlYngdvbq&utparam-url=scene%3Asearch%7Cquery_from%3A
-
-
-10kOhm resistor
-pushbutton 2.4 eur
-https://www.aliexpress.com/item/1005004971266223.html?spm=a2g0o.order_list.order_list_main.41.71c71802Jzz7iV
-
-Logic level converter
-https://www.aliexpress.com/item/1005006371140878.html?spm=a2g0o.order_list.order_list_main.206.71c71802Jzz7iV
-
-slimeVr BNO085 IMU sensor 12 Eur
-https://shop.slimevr.dev/ 
-Arduino DUE 13.5 Euro
-https://www.aliexpress.com/item/1005007168430629.html?spm=a2g0o.order_list.order_list_main.46.71c71802Jzz7iV
-20 LED, ready with resistors for 3.3V 2.94 Eur
-https://www.aliexpress.com/item/1005004321871984.html?spm=a2g0o.order_list.order_list_main.58.71c71802Jzz7iV
-Dupont-male connectors 2.1 Eur
-https://www.aliexpress.com/item/1005006263579523.html?spm=a2g0o.order_list.order_list_main.76.71c71802Jzz7iV
-
-
-With the potentiometer, the direction can be adjusted 360 degrees
-
-the push button: at start, the light is continuous, with "double press", the LED will be blinking
-with a long press, there is a lamp test, every lamp is switched on , going around one time
-
+The principal electrical drawing
+ /home/users/raikkulenz/sites/raikkulenz.kapsi.fi/www/bodycompass_kuvat/updated_circuit.png
 
