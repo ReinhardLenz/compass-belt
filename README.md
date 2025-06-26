@@ -6,45 +6,27 @@ Many migratory animals, such as birds and fish, are said to know the compass dir
 For humans, this kind of knowledge may be needed, for example, when picking berries in an unfamiliar place or simply when losing one's sense of direction.
 A compass belt is a belt that helps you know where north is without looking at a compass. It has small vibration motors and a sensor that detects the Earth's magnetic field. When you wear it, the motor facing north vibrates slightly, giving the wearer an "intuitive" sense of direction.
 Why is this cool? Imagine you are in the forest picking mushrooms at dusk and you lose your bearings. With this belt, you will always feel the "tingle" of the North Pole, which helps you stay on track without maps or compasses.
-/home/users/raikkulenz/sites/raikkulenz.kapsi.fi/www/bodycompass_kuvat/vyo-lantiolla.jpg
 
 This is how I built mine:
 I ordered the electronic parts online for about $60.
 Then I sewed and soldered the vibration motors onto a stretchy fabric belt.
 I added a plastic buckle and used a textile tube to protect it.
-
-
 As an orienteering enthusiast with a basic knowledge of electronics, I found this project both fun and useful. Whether you're exploring new trails or just love cool gadgets, the Compass Belt can be a great companion!
-
-
 Direction adjustment
 Adjustment knob to adjust the direction 0... 360 degrees
-
-
 vibration modes
 Double-click to switch between continuous and intermittent vibration. Single-click to switch between 1, 2, 3, or 4 seconds. Long press to quickly test that all vibrators are working.
-
-
 Smart sensor
 A self-calibrating magnetometer that recognizes whether you are walking, cycling, or standing still.
-
-
 Battery-powered for hours of navigation.
 Two batteries provide approximately 3 hours of use.
-
-
 Circuit Documentation
-
+![circuit_designer](https://github.com/user-attachments/assets/2ff25795-4568-4cbd-bd98-3c7b32f77b42)
 
 Summary
-
-
 This circuit is designed to interface an Arduino Mega 2560 or Arduino Due with various components, including a Bi-Directional Logic Level Converter, a Trimmer Potentiometer, multiple Vibration Motors, an Adafruit BNO085 9-DOF Orientation IMU Fusion, and other components. The circuit is powered by 18650 batteries and includes a toggle switch for power control. The Arduino Mega 2560 or Arduino Due is programmed to control the vibration motors based on input from the IMU and other sensors, providing haptic feedback about north direction.
 
-
 Component List
-
-
 Arduino Mega 2560 or Arduino Due
 A microcontroller board based on the Atmel SAM3X8E ARM Cortex-M3 CPU.
 Features multiple I/O pins, PWM outputs, and communication interfaces.
@@ -89,8 +71,6 @@ shopping cart style collection of parts which have to be bought
 
 
 Wiring Details
-
-
 Arduino Mega 2560 or Arduino Due
 A2: Connected to the wiper of the Trimmer Potentiometer.
 A1: Connected to pin1 of the Resistor (10k Ohms) and pin2 of the Push Button.
@@ -156,6 +136,7 @@ VOUT+: Connected to COM of the Toggle Switch.
 Push Button
 Pin1: Connected to LV of the Bi-Directional Logic Level Converter .
 Pin2: Connected to A1 of the Arduino Mega 2560 or Arduino Due and connected to pin1 of 10 k Ohms resistor.
+![kompassivyo4A](https://github.com/user-attachments/assets/c6482c4e-07e0-4484-9e4b-4e2c377a6f44)
 
 
 Code Documentation
@@ -169,5 +150,5 @@ Pin Configuration: Defines pins for buttons and vibration motors.
 Sensor Initialization: Initializes the BNO08x sensor and sets up the desired reports.
 Main Loop: Continuously reads button states, updates the compass heading, and controls the haptic belt based on the heading.
 The principal electrical drawing
- /home/users/raikkulenz/sites/raikkulenz.kapsi.fi/www/bodycompass_kuvat/updated_circuit.png
+
 
