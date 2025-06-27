@@ -12,14 +12,21 @@ I ordered the electronic parts online for about $60.
 Then I sewed and soldered the vibration motors onto a stretchy fabric belt.
 I added a plastic buckle and used a textile tube to protect it.
 As an orienteering enthusiast with a basic knowledge of electronics, I found this project both fun and useful. Whether you're exploring new trails or just love cool gadgets, the Compass Belt can be a great companion!
+
 Direction adjustment
+
 Adjustment knob to adjust the direction 0... 360 degrees
+
 vibration modes
+
 Double-click to switch between continuous and intermittent vibration. Single-click to switch between 1, 2, 3, or 4 seconds. Long press to quickly test that all vibrators are working.
+
 Smart sensor
+
 A self-calibrating magnetometer that recognizes whether you are walking, cycling, or standing still.
 Battery-powered for hours of navigation.
 Two batteries provide approximately 3 hours of use.
+
 Circuit Documentation
 ![circuit_designer](https://github.com/user-attachments/assets/2ff25795-4568-4cbd-bd98-3c7b32f77b42)
 
