@@ -79,7 +79,7 @@ D21/SCL3: Connected to HV3 of the Bi-Directional Logic Level Converter.
 5V: Connected to HV of the Bi-Directional Logic Level Converter.
 GND: Connected to GND of the Bi-Directional Logic Level Converter, Resistor (10k Ohms), Trimmer Potentiometer, Adafruit BNO085, Boost module MT3608 and Vibration Motors.
 VIN: Connected to L1 of the Toggle Switch.
-D34 to D53: Connected to the positive terminals of various Vibration Motors.
+D26 to D43: Connected to the positive terminals of various Vibration Motors.
 
 
 Bi-Directional Logic Level Converter
