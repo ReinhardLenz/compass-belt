@@ -25,7 +25,8 @@ CompassBelt::CompassBelt(HapticBelt* belt, unsigned long vibrationDuration, unsi
   vibrationInterval_ = vibrationInterval;
   lastOn_ = 0;
   lastDirection_ = -1;
-  int pins[20] = {26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45};
+int pins[20] = {24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43};
+
 
   for (int i = 0; i < 20; i++) {
     belt_pins[i] = pins[i];
