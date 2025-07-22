@@ -75,11 +75,16 @@ Please refer to the full circuit diagram in the [`/docs`](docs/) folder. Below i
 
 compass-belt/
 ├── docs/
+
 │ └── circuit-diagram.png
+
 ├── firmware/
 │ └── compass_belt.ino
+
 ├── 3d-models/
+
 │ └── housing_parts.stl
+
 ├── README.md
 
 yaml
