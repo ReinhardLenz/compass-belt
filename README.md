@@ -76,14 +76,13 @@ Please refer to the full circuit diagram in the [`/docs`](docs/) folder. Below i
 compass-belt/
 ├── docs/
 
-│ └── circuit-diagram.png
+│ └── circuit_designer.pdf
 
-├── firmware/
-│ └── compass_belt.ino
+│ └──excel_calculation_of_measurements_for_fitting_around_the_stomach.ods
 
 ├── 3d-models/
 
-│ └── housing_parts.stl
+│ └── bodycompassparts.zip
 
 ├── README.md
 
