@@ -119,3 +119,6 @@ This project is open-source under the MIT License. See [LICENSE](LICENSE) for mo
 
 - Inspired by orienteering and the concept of haptic perception.
 - Thanks to SlimeVR and Adafruit for providing open tools and libraries.
+
+
+![Visitor Count](https://komarev.com/ghpvc/?username=ReinhardLenz&repo=compass-belt&color=green)
