@@ -1,4 +1,17 @@
 Variation with 20 pins, otherwise as the other branches
+
+Note for Arduino Due adjustment in Arduino :
+Programming port is next to Powerk jack!
+Plug to USB directly in computer, not in the HUB!
+The Due is very sensitive to USB ports and cables because:
+its native USB interface draws more power than most boards,
+Windows sometimes assigns different COM drivers per port, and
+some USB 3.0 ports (especially on laptops) have compatibility quirks.
+
+Tools-> Board-> chose: Arduino Due Programming Port
+Tools-> Port 13 (Arduino Due (Programming Port))
+Tools → Programmer → “Atmel SAM-ICE” 
+
 ![arduino-LED-kehä](https://github.com/user-attachments/assets/fc304d0d-8c2b-44e4-81e2-ed0b36371ae2)
 
 Material:
