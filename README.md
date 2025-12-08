@@ -24,6 +24,7 @@ The **Compass Belt** is a wearable haptic device that helps the user intuitively
   - `Adafruit_BNO08x`
   - `OneButton`
   - `Wire`
+  - with Board Arduino MEGA 2560: "Tools -> Board =  Arduino MEGA 2560 and Tools -> programmer -> AVRISP mkll"
 
 Install these via the Library Manager in the Arduino IDE.
 
