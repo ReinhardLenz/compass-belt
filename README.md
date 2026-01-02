@@ -1,4 +1,4 @@
-# Compass Belt
+# Compass Belt SEEDUINO XIAO Branch
 
 The **Compass Belt** is a wearable haptic device that helps the user intuitively sense the direction of magnetic north. Inspired by the natural orientation abilities of migratory animals, this DIY project offers a subtle and continuous navigational aid through vibration motors, enabling better orientation while hiking, orienteering, or exploring unfamiliar environments.
 
@@ -30,19 +30,6 @@ Install these via the Library Manager in the Arduino IDE.
 
 ### Hardware Components
 
-| Component                           | Quantity |
-|------------------------------------|----------|
-| Arduino Mega 2560 or Arduino Due   | 1        |
-| Adafruit BNO085 IMU Sensor         | 1        |
-| Vibration Motors                   | ~20      |
-| Trimmer Potentiometer (10kΩ)       | 1        |
-| Resistors (4.7kΩ x2, 10kΩ x1)      | 3        |
-| Bi-Directional Logic Level Converter | 1      |
-| MT3608 Boost Converter             | 1        |
-| 18650 Battery & Holder             | 2        |
-| Toggle Switch                      | 1        |
-| Push Button                        | 1        |
-| Stripboard, wires, Dupont connectors, JST XH headers | Various |
 
 ### Wiring Diagram
 
