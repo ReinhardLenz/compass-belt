@@ -2,7 +2,6 @@
 
 The **Compass Belt** is a wearable haptic device that helps the user intuitively sense the direction of magnetic north. Inspired by the natural orientation abilities of migratory animals, this DIY project offers a subtle and continuous navigational aid through vibration motors, enabling better orientation while hiking, orienteering, or exploring unfamiliar environments.
 
-![bodycompass_suspenders](https://github.com/user-attachments/assets/4c6ca2b8-42a0-4c28-90ce-aa9aae7cf160)
 
 ## 🧭 Features
 
